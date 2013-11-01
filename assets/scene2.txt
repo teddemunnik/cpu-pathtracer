@@ -1,0 +1,7 @@
+Model scene = "assets/scene2.obj";
+
+scene["lambert2SG"] = {
+	light: 1.0f,
+	intensity: 5.0f
+};
+

@@ -1,0 +1,9 @@
+Debug/
+Release/
+*.vsp
+*.exe
+*.pdb
+*.psess
+*.ilk
+*.sdf
+*.opensdf

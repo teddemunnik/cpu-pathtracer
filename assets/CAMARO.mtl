@@ -1,0 +1,485 @@
+newmtl CAMARO:Badging_Chrome
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Badging_Chrome0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 29.86
+newmtl CAMARO:Badging_Chrome3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Black
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Body_paint
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Body_paint0
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Body_paint3
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Bottom
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BOTTOM.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Bottom0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BOTTOM.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Bottom3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BOTTOM.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Brake_Disc
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BRAKDISC.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 12.13
+newmtl CAMARO:Brake_Disc0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BRAKDISC.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 12.13
+newmtl CAMARO:Brake_Pads
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 45.25
+newmtl CAMARO:DoorLine0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd DOORLINE.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:DoorLine1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd DOORLINE.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Interior0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Interior1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Interior_Chrome
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:License
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd LICENSE.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Mat
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 24.25
+newmtl CAMARO:Material__580
+illum 4
+Kd 0.92 0.00 0.00
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 27.86
+newmtl CAMARO:Material__588
+illum 4
+Kd 1.00 1.00 1.00
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 32.00
+newmtl CAMARO:Material__589
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 0.54 0.54 0.54
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 0.00
+newmtl CAMARO:Material__592
+illum 4
+Kd 0.35 0.35 0.35
+Ka 0.35 0.35 0.35
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.59
+newmtl CAMARO:Material__595
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 73.52
+newmtl CAMARO:Material__597
+illum 4
+Kd 0.20 0.20 0.20
+Ka 0.20 0.20 0.20
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 32.00
+newmtl CAMARO:Material__598
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 0.31 0.31 0.31
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__602
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__605
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+map_Kd Lines1.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__606
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__609
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__610
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__611
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+map_Kd Lines1.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__618
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 0.31 0.31 0.31
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__619
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__621
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__622
+illum 4
+Kd 0.94 0.67 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__625
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 0.31 0.31 0.31
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__628
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+map_Kd Lines2.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Material__640
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.94 0.67 0.00
+Tf 1.00 1.00 1.00
+map_Kd Lines1.png
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 22.63
+newmtl CAMARO:Misc
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Misc0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Misc3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 55.72
+newmtl CAMARO:Misc5
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 19.70
+newmtl CAMARO:Misc7
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Misc9
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Misc11
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 4.00
+newmtl CAMARO:Misc_Chrome
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Misc_Chrome0
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 27.86
+newmtl CAMARO:Misc_Chrome3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 147.03
+newmtl CAMARO:Misc_Chrome5
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 13.93
+newmtl CAMARO:Misc_Chrome7
+illum 4
+Kd 1.00 0.59 0.16
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 28.48
+newmtl CAMARO:Misc_Chrome9
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 90.51
+newmtl CAMARO:Misc_Chrome11
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 128.00
+newmtl CAMARO:Misc_Chrome13
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Misc_Chrome15
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 64.00
+newmtl CAMARO:Tire
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.19 0.19 0.19
+Tf 1.00 1.00 1.00
+map_Kd TIRE.png
+Ni 1.00
+Ks 1.00 1.00 1.00
+Ns 9.85
+newmtl CAMARO:chrome
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 25.99
+newmtl CAMARO:glass
+illum 4
+Kd 0.59 0.59 0.59
+Ka 0.59 0.59 0.59
+Tf 0.46 0.46 0.46
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 0.00

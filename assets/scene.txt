@@ -1,0 +1,30 @@
+
+
+Model scene = "assets/scene.obj";
+
+scene["lambert2SG"] = {
+	light: 1.0f,
+	intensity: 5.0f
+};
+
+Model camaro = "assets/CAMARO.obj";
+
+
+object glass = {
+	refr: 0.85f,
+	refrIndex: 1.0f
+};
+camaro["CAMARO:glass"] = glass;
+camaro["CAMARO:Material__625"] = glass;
+camaro["CAMARO:Material__598"] = glass;
+camaro["CAMARO:Material__618"] = glass;
+camaro["CAMARO:Material__589"] = glass;
+
+camaro["CAMARO:Material__580"] = {
+	light: 1.0f,
+	intensity: 0.6f
+};
+camaro["CAMARO:Material__588"] = {
+	light: 1.0f,
+	intensity: 5.0f
+};
