@@ -47,17 +47,17 @@ bool BVHNode::doSplit(){
 	m_Right->m_Bounds.min[dominantaxis] = half;
 	return success;
 }
-bool BVHNode::split( int depth){
+bool BVHNode::split( int depth, int multipleOf){
 	assert(m_Left==nullptr&&m_Right==nullptr);
 	bool success = false;
-	if(m_PrimitiveCount >= 5){
+	if(((depth) % multipleOf) != 0 || m_PrimitiveCount >= 5){
 		success = doSplit();
 
 		//Attempt to split the new nodes
 		if(depth < 100){
 			bool s1 = m_Left->split(depth+1);
 			bool s2 = m_Right->split(depth+1);
-			if(!s1 && !s2){
+			if(!s1 && !s2 && (depth) % multipleOf != 0){
 				delete m_Left, m_Right;
 				m_Left=nullptr, m_Right=nullptr;
 			}else{

@@ -311,7 +311,7 @@ int Scene::findFirstPrimary(PrimaryRayBundle* _Rays, const BVHNode& node, int fi
 	return PrimaryRayBundle::kPackedCount;
 }
 void Scene::intersectSecondary_r(Ray* _Ray, const MBVHNode& node){
-	if(node.children){
+	if(node.children[0]){
 		const __m128 Ox4 = _mm_set1_ps(_Ray->O.x), Oy4 = _mm_set1_ps(_Ray->O.y), Oz4 = _mm_set1_ps(_Ray->O.z);
 		const __m128 Dx4 = _mm_set1_ps(_Ray->D.x), Dy4 = _mm_set1_ps(_Ray->D.y), Dz4 = _mm_set1_ps(_Ray->D.z);
 
@@ -330,10 +330,10 @@ void Scene::intersectSecondary_r(Ray* _Ray, const MBVHNode& node){
 		tmax4 = _mm_min_ps(tmax4, _mm_max_ps(t0z4, t1z4));
 
 		const unsigned int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(tmin4, tmax4), _mm_cmpgt_ps(tmax4, _mm_setzero_ps())));
-		if(mask & 1 ) intersectSecondary_r(_Ray, node.children[0]);
-		if(mask & 2 ) intersectSecondary_r(_Ray, node.children[1]);
-		if(mask & 4 ) intersectSecondary_r(_Ray, node.children[2]);
-		if(mask & 8 ) intersectSecondary_r(_Ray, node.children[3]);
+		if(mask & 1 ) intersectSecondary_r(_Ray, *node.children[0]);
+		if(mask & 2 ) intersectSecondary_r(_Ray, *node.children[1]);
+		if(mask & 4 ) intersectSecondary_r(_Ray, *node.children[2]);
+		if(mask & 8 ) intersectSecondary_r(_Ray, *node.children[3]);
 	}else{
 		for(int i=0; i<node.primCount; ++i){
 			node.primList[i].intersectSecondary(_Ray);
@@ -357,12 +357,7 @@ void Scene::load(const char* path){
 	root.setTriangles(primList, primCount);
 	root.split();
 
-	primList2 = new Triangle[150000];
-	memcpy(primList2, primList, primCount*sizeof(Triangle));
-
-	mbvhRoot.primList = primList2;
-	mbvhRoot.primCount = primCount;
-	mbvhRoot.split(0);
+	mbvhRoot.fromBvh(root);
 
 	
 }
@@ -473,7 +468,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene2.txt");
+	m_Scene.load("assets/scene.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];

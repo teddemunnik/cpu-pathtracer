@@ -98,7 +98,7 @@ void Renderer::render(){
 	if(m_Effects.size() > 0){
 		//Render effects alternating between the two framebuffers
 		int fromId=1,  toId=0;
-		for(int i=0; i<m_Effects.size()-1; ++i){
+		for(size_t i=0; i<m_Effects.size()-1; ++i){
 			m_Effects[i]->applyEffect(this, m_FrameBufferTextures[fromId], m_FrameBuffers[toId]);
 			std::swap(fromId, toId);
 		}

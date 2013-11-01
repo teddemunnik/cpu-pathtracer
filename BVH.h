@@ -17,7 +17,7 @@ public:
 	BVHNode();
 	~BVHNode();
 	bool doSplit();
-	bool split(int depth=0);
+	bool split(int depth=0, int multipleOf=1);
 	void setTriangles(Triangle* _PrimList, int _PrimCount);
 
 	void schrink();

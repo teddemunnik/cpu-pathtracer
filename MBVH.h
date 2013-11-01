@@ -18,9 +18,14 @@ public:
 	Triangle* primList;
 	int primCount;
 
-	MBVHNode* children;
+	MBVHNode* children[4];
 
 	MBVHNode();
 	~MBVHNode();
-	void split(int depth);
+
+	void fromBvh(const class BVHNode& root);
+	void _fill(const class BVHNode& node);
+	
+	void* operator new(size_t size);
+	void operator delete(void*);
 };
