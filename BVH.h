@@ -16,7 +16,10 @@ public:
 public:
 	BVHNode();
 	~BVHNode();
+	bool doSplit();
 	bool split(int depth=0);
-
 	void setTriangles(Triangle* _PrimList, int _PrimCount);
+
+	void schrink();
+	void schrink_r();
 };

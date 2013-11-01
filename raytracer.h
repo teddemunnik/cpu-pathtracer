@@ -88,8 +88,12 @@ private:
 	BVHNode root;
 	MBVHNode mbvhRoot;
 
+	//BVH primitives
 	Triangle* primList;
 	int primCount;
+
+	//MBVH primitives
+	Triangle* primList2;
 public:
 	Scene();
 	~Scene();

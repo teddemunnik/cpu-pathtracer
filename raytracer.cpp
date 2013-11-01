@@ -105,7 +105,27 @@ void Triangle::intersectPrimary(PrimaryRayBundle* _Rays, int first) const{
 	}
 }
 void Triangle::intersectSecondary(Ray* _Ray) const{
-	_Ray->prim = const_cast<Triangle*>(this);
+	const float3 e1 = v1-v0;
+	const float3 e2 = v2-v0;
+
+	const float3 pvec = Cross(_Ray->D, e2);
+	const float det = Dot(e1, pvec);
+
+	const float3 tvec = _Ray->O - v0;
+	const float u = Dot(tvec, pvec);
+	if(u < 0 || u > det) return;
+	const float3 qvec = Cross(tvec, e1);
+	const float v = Dot(_Ray->D, qvec);
+	if(v < 0 || u + v > det) return;
+	const float invdet = 1.0f/det;
+	const float t = Dot(e2, qvec) * invdet;
+	if(t > 0.0f && t < _Ray->t){
+		_Ray->t = t;
+		_Ray->u = u*invdet;
+		_Ray->v = v*invdet;
+		_Ray->prim = const_cast<Triangle*>(this);
+	}
+
 }
 
 // == Camera class ============================================================
@@ -291,11 +311,7 @@ int Scene::findFirstPrimary(PrimaryRayBundle* _Rays, const BVHNode& node, int fi
 	return PrimaryRayBundle::kPackedCount;
 }
 void Scene::intersectSecondary_r(Ray* _Ray, const MBVHNode& node){
-	if(node.isLeaf){
-		//for(int i=0; i<node.primCount; ++i){
-		//	node.primList[i].intersectSecondary(_Ray);
-		//}
-	}else{
+	if(node.children){
 		const __m128 Ox4 = _mm_set1_ps(_Ray->O.x), Oy4 = _mm_set1_ps(_Ray->O.y), Oz4 = _mm_set1_ps(_Ray->O.z);
 		const __m128 Dx4 = _mm_set1_ps(_Ray->D.x), Dy4 = _mm_set1_ps(_Ray->D.y), Dz4 = _mm_set1_ps(_Ray->D.z);
 
@@ -314,11 +330,14 @@ void Scene::intersectSecondary_r(Ray* _Ray, const MBVHNode& node){
 		tmax4 = _mm_min_ps(tmax4, _mm_max_ps(t0z4, t1z4));
 
 		const unsigned int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(tmin4, tmax4), _mm_cmpgt_ps(tmax4, _mm_setzero_ps())));
-		return;
-		if(mask & 0x1 && node.children[0]) intersectSecondary_r(_Ray, *node.children[0]);
-		if(mask & 0x2 && node.children[1]) intersectSecondary_r(_Ray, *node.children[1]);
-		if(mask & 0x4 && node.children[2]) intersectSecondary_r(_Ray, *node.children[2]);
-		if(mask & 0x8 && node.children[3]) intersectSecondary_r(_Ray, *node.children[3]);
+		if(mask & 1 ) intersectSecondary_r(_Ray, node.children[0]);
+		if(mask & 2 ) intersectSecondary_r(_Ray, node.children[1]);
+		if(mask & 4 ) intersectSecondary_r(_Ray, node.children[2]);
+		if(mask & 8 ) intersectSecondary_r(_Ray, node.children[3]);
+	}else{
+		for(int i=0; i<node.primCount; ++i){
+			node.primList[i].intersectSecondary(_Ray);
+		}
 	}
 }
 void Scene::intersectSecondary(Ray* _Ray){
@@ -337,6 +356,14 @@ void Scene::load(const char* path){
 	//Boot tha BVH
 	root.setTriangles(primList, primCount);
 	root.split();
+
+	primList2 = new Triangle[150000];
+	memcpy(primList2, primList, primCount*sizeof(Triangle));
+
+	mbvhRoot.primList = primList2;
+	mbvhRoot.primCount = primCount;
+	mbvhRoot.split(0);
+
 	
 }
 void Scene::LoadOBJ(Model* model){
@@ -446,7 +473,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene.txt");
+	m_Scene.load("assets/scene2.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
@@ -496,6 +523,7 @@ void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 
 	for(int i=0; i<PrimaryRayBundle::kRayCount; ++i){
 		const Triangle* tri = _Rays->prim[i];
+		if(!tri) continue;
 		const Material* mat = tri->material;
 
 		if(mat->light > 0.0001f){
@@ -504,25 +532,25 @@ void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 		}
 
 		const float3 normal = tri->n0 + _Rays->u[i] * (tri->n1-tri->n0) + _Rays->v[i] * (tri->n2-tri->n0);
-		
-		
+		const float3 O = float3(_Rays->Ox4[i/4].m128_f32[i%4], _Rays->Oy4[i/4].m128_f32[i%4], _Rays->Oz4[i/4].m128_f32[i%4]);
+		const float3 D = float3(_Rays->Dx4[i/4].m128_f32[i%4], _Rays->Dy4[i/4].m128_f32[i%4], _Rays->Dz4[i/4].m128_f32[i%4]);
 
 		Ray reflect;
-		reflect.O = float3(_Rays->Ox4[i/4].m128_f32[i%4], _Rays->Oy4[i/4].m128_f32[i%4], _Rays->Oz4[i/4].m128_f32[i%4]);
-		reflect.D = Reflect(float3(_Rays->Dx4[i/4].m128_f32[i%4], _Rays->Dy4[i/4].m128_f32[i%4], _Rays->Dz4[i/4].m128_f32[i%4]), normal);
+		reflect.O = O + D * _Rays->t[i];
+		reflect.D = Reflect(D, normal);
 		reflect.O += reflect.D * EPSILON;
 		reflect.t = 1e34f;
 		reflect.prim = nullptr;
 
 
 		if(tri && tri->material){
-			m_FpBuffer[_Rays->addr[i]] += normal;//traceSecondary(&reflect);
+			m_FpBuffer[_Rays->addr[i]] += traceSecondary(&reflect);
 		}
 	}
 }
 float3 Tracer::traceSecondary(Ray* _Ray){
 	m_Scene.intersectSecondary(_Ray);
-
+	return float3(_Ray->t, _Ray->t, _Ray->t)/10.0f;
 	const Triangle* tri = _Ray->prim;
 	if(!tri) return float3(0,0,0);
 	const Material* mat = tri->material;
