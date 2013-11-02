@@ -5,8 +5,8 @@ scene["lambert2SG"] = {
 	intensity: 5.0f
 };
 
-Model glass = "assets/sphere.obj";
-glass["sphere:initialShadingGroup"] = {
+Model glass = "assets/cube.obj";
+glass["cube:initialShadingGroup"] = {
 	refr: 1.0f,
 	refrIndex: 1.5f
 };

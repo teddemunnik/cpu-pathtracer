@@ -11,7 +11,6 @@
 #include <assert.h>
 #include <gl/glew.h>
 #include "SceneImporter.h"
-#include <smmintrin.h>
 
 using namespace Tmpl8;
 
@@ -111,7 +110,7 @@ void Triangle::intersectSecondary(Ray* _Ray) const{
 	const float3 pvec = Cross(_Ray->D, e2);
 
 	float det = Dot(e1, pvec);
-	if(det > -EPSILON && det < EPSILON) return;
+	//if(det > -EPSILON && det < EPSILON) return;
 	const float invdet = 1.0f/det;
 
 	const float3 tvec = _Ray->O - v0;
@@ -120,7 +119,6 @@ void Triangle::intersectSecondary(Ray* _Ray) const{
 	const float3 qvec = Cross(tvec, e1);
 	const float v = Dot(_Ray->D, qvec) * invdet;
 	if(v < 0 || u + v > 1) return;
-
 	const float t = Dot(e2, qvec) * invdet;
 	if(t > 0 && t < _Ray->t){
 		_Ray->t = t;
@@ -592,7 +590,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	const Material& mat = *_Ray->prim->material;
 
 	//Light
-	const float3 color = getColorAtIP(*_Ray);
+	float3 color = getColorAtIP(*_Ray);
 	if(mat.light>EPSILON){
 		return color;
 	}
@@ -607,11 +605,18 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		if(ddn > 0){
 			nnt = mat.refrIndex;
 			nt = 1.0f/nnt;		
+
+			//Exiting ray (color is beers law)
+			const float c1 = -5.0f * _Ray->t;
+			color = float3(expf(c1*(1.0f-color.x)), expf(c1*(1.0f-color.y)), expf(c1*(1.0f-color.z)));
 		}else{
 			normal = -normal;
 			ddn = -ddn;
 			nt = mat.refrIndex;
 			nnt = 1.0f/nt;
+
+			//Ingoing ray
+			color = float3(1,1,1);
 		}
 
 		cosT2 = 1.0f - nnt*nnt * (1.0f - ddn*ddn);
@@ -626,6 +631,8 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 			refl = refl + Wr * refr;
 			refr = Wt * refr;
 		}
+
+
 	}
 	const float path = randf_oo();
 	//Reflection
