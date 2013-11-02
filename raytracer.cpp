@@ -468,7 +468,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene2.txt");
+	m_Scene.load("assets/scene.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
@@ -525,14 +525,18 @@ void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 			ray.u = _Rays->u4[i].m128_f32[j];
 			ray.v = _Rays->v4[i].m128_f32[j];
 			ray.prim = (Triangle*)_Rays->prim4[i].m128i_i32[j];
-			m_FpBuffer[_Rays->addr4[i].m128i_i32[j]] += trace(&ray, 0);
+			m_FpBuffer[_Rays->addr4[i].m128i_i32[j]] += trace(&ray, 1.0f,  0);
 		}
 	}
 }
 float3 Tracer::traceSecondary(Ray* _Ray, int bounce){
 	if(bounce >= 4) return float3(0,0,0);
+
+	//Russian roulette
+	if(randf_oo() > 0.5f) return float3(0,0,0);
+
 	m_Scene.intersectSecondary(_Ray);
-	return trace(_Ray, bounce);
+	return trace(_Ray, 2.0f, bounce);
 }
 float3 DiffuseDirection(const float3& normal){
 	const float3 absNormal(fabsf(normal.x), fabsf(normal.y), fabsf(normal.z));
@@ -570,7 +574,7 @@ float3 getColorAtIP(Ray& _Ray){
 		return _Ray.prim->material->color;
 	}
 }
-float3 Tracer::trace(Ray* _Ray, int bounce){
+float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	if(!_Ray->prim || !_Ray->prim->material) return float3(0,0,0);
 	const Material& mat = *_Ray->prim->material;
 
@@ -622,7 +626,7 @@ float3 Tracer::trace(Ray* _Ray, int bounce){
 		r.O += r.D*EPSILON;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * traceSecondary(&r, bounce+1);
+		return color * power * traceSecondary(&r, bounce+1);
 	}
 
 	//Refraction
@@ -633,7 +637,7 @@ float3 Tracer::trace(Ray* _Ray, int bounce){
 		r.D = D;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * traceSecondary(&r, bounce+1);
+		return color * power *  traceSecondary(&r, bounce+1);
 	}
 
 	{
@@ -646,7 +650,7 @@ float3 Tracer::trace(Ray* _Ray, int bounce){
 		r.O += r.D*EPSILON;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * traceSecondary(&r, bounce+1);
+		return color * power * traceSecondary(&r, bounce+1);
 	}
 }
 Camera& Tracer::camera(){

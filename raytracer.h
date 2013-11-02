@@ -164,7 +164,7 @@ public:
 	void trace(int tileIdx);
 	void tracePrimary(PrimaryRayBundle* _Rays);
 	float3 traceSecondary(Ray* _Ray, int bounce=0);
-	float3 trace(Ray* _Ray, int bounce=0);
+	float3 trace(Ray* _Ray, float power, int bounce=0);
 
 	Scene& scene();
 	Camera& camera();
