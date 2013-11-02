@@ -497,6 +497,8 @@ Tracer::Tracer() :
 
 	m_FpBuffer = new float3a[SCRWIDTH*SCRHEIGHT];
 	clear();
+
+	m_Simple = false;
 }
 
 void Tracer::init(){
@@ -536,6 +538,9 @@ void TraceJob::run(){
 	for(int i=start; i<end; ++i){
 		tracer->trace(i);
 	}
+}
+void Tracer::setShadingMode(Tracer::ShadeMode mode){
+	m_Simple = (mode == kShadeSimple);
 }
 void Tracer::trace(int tileIdx){
 	const int xcoord = tileIdx % (SCRWIDTH/PrimaryRayBundle::kWidth);
@@ -609,9 +614,13 @@ float3 getColorAtIP(Ray& _Ray){
 float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	if(!_Ray->prim || !_Ray->prim->material) return float3(0,0,0);
 	const Material& mat = *_Ray->prim->material;
+	float3 color = getColorAtIP(*_Ray);
+	if(m_Simple){
+		return color;
+	}
 
 	//Light
-	float3 color = getColorAtIP(*_Ray);
+
 	if(mat.light>EPSILON){
 		return color;
 	}

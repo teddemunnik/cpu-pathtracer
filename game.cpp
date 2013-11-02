@@ -23,6 +23,7 @@ float3 g_CameraRotation(0,0,0);
 float g_FocalDist = 5.0f;
 float g_ApertureSize = 0.0f;
 bool g_KeyState[512];
+Tracer::ShadeMode g_ShadeMode = Tracer::kShadeComplex;
 
 TwBar* g_Bar;
 
@@ -45,6 +46,7 @@ void Game::KeyUp(unsigned int keycode){
 void Game::KeyDown(unsigned int keycode){
 	g_KeyState[keycode]=true;
 }
+bool wasTab = false;
 void Game::Tick( float a_DT )
 {
 	//Camera movement
@@ -57,6 +59,8 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 
 		if(SQRLENGTH(movement) > 1) Normalize(movement);
+
+		if(g_KeyState[SDL_SCANCODE_LSHIFT]) movement*=5.0f;
 
 		//Extract rotation matrix
 		float4x4 transform = tracer.camera().transform();
@@ -101,6 +105,14 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 	}
 
+	//Toggle simple shading
+	if(g_KeyState[SDL_SCANCODE_TAB]) wasTab=true;
+	else if(wasTab){
+		g_ShadeMode = g_ShadeMode == Tracer::kShadeComplex ? Tracer::kShadeSimple : Tracer::kShadeComplex;
+		tracer.setShadingMode(g_ShadeMode);
+		wasTab = false;
+		tracer.clear();
+	}
 
 	//save to file
 	if(g_KeyState[SDLK_SPACE]){

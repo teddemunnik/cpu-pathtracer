@@ -151,6 +151,11 @@ public:
 };
 class Tracer
 {
+public:
+	enum ShadeMode{
+		kShadeSimple,
+		kShadeComplex
+	};
 private:
 	//Accumulation buffer
 	float3a* m_FpBuffer;
@@ -161,6 +166,8 @@ private:
 	JobManager m_JobManager;
 	JobGroup m_Jobs;
 	TraceJob* m_JobPtrs;
+
+	bool m_Simple;
 
 public:
 	// constructor
@@ -178,6 +185,8 @@ public:
 
 	Scene& scene();
 	Camera& camera();
+
+	void setShadingMode(ShadeMode mode);
 
 	const float3a* getAccumulationBuffer() const;
 	int getAccumulationBufferCount() const;

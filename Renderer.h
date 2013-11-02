@@ -21,6 +21,7 @@ private:
 
 	std::vector<PostFX*> m_Effects;
 
+
 	void renderFullscreen();
 public:
 	Renderer();
