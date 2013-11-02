@@ -8,5 +8,5 @@ scene["lambert2SG"] = {
 Model glass = "assets/sphere.obj";
 glass["sphere:initialShadingGroup"] = {
 	refr: 1.0f,
-	refrIndex: 1.6f
+	refrIndex: 1.5f
 };

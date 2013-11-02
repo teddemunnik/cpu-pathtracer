@@ -109,20 +109,23 @@ void Triangle::intersectSecondary(Ray* _Ray) const{
 	const float3 e2 = v2-v0;
 
 	const float3 pvec = Cross(_Ray->D, e2);
-	const float det = Dot(e1, pvec);
+
+	float det = Dot(e1, pvec);
+	if(det > -EPSILON && det < EPSILON) return;
+	const float invdet = 1.0f/det;
 
 	const float3 tvec = _Ray->O - v0;
-	const float u = Dot(tvec, pvec);
-	if(u < 0 || u > det) return;
+	const float u = Dot(tvec, pvec) * invdet;
+	if(u < 0 || u > 1) return;
 	const float3 qvec = Cross(tvec, e1);
-	const float v = Dot(_Ray->D, qvec);
-	if(v < 0 || u + v > det) return;
-	const float invdet = 1.0f/det;
+	const float v = Dot(_Ray->D, qvec) * invdet;
+	if(v < 0 || u + v > 1) return;
+
 	const float t = Dot(e2, qvec) * invdet;
-	if(t > 0.0f && t < _Ray->t){
+	if(t > 0 && t < _Ray->t){
 		_Ray->t = t;
-		_Ray->u = u*invdet;
-		_Ray->v = v*invdet;
+		_Ray->u = u;
+		_Ray->v = v;
 		_Ray->prim = const_cast<Triangle*>(this);
 	}
 
@@ -599,16 +602,16 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	float nt, nnt, ddn, cosT2;
 	float refl = mat.refl;
 	float refr = mat.refr;
-	/*if(mat.refr > EPSILON){
+	if(mat.refr > EPSILON){
 		ddn = Dot(normal, _Ray->D);
 		if(ddn > 0){
-			nt = mat.refrIndex;
-			nnt = 1.0f/nt;
+			nnt = mat.refrIndex;
+			nt = 1.0f/nnt;		
 		}else{
 			normal = -normal;
-			nnt = mat.refrIndex;
-			nt = 1.0f/nnt;
 			ddn = -ddn;
+			nt = mat.refrIndex;
+			nnt = 1.0f/nt;
 		}
 
 		cosT2 = 1.0f - nnt*nnt * (1.0f - ddn*ddn);
@@ -623,7 +626,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 			refl = refl + Wr * refr;
 			refr = Wt * refr;
 		}
-	}*/
+	}
 	const float path = randf_oo();
 	//Reflection
 	if(path < refl){
@@ -637,15 +640,15 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	}
 
 	//Refraction
-	/*if(path < refl+refr){
+	if(path < refl+refr){
 		const float3 D = Normalize(nnt * _Ray->D - normal * (nnt*ddn - sqrtf(cosT2)));
 		Ray r;
 		r.O = _Ray->O + _Ray->D * _Ray->t + D * EPSILON;
 		r.D = D;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		//return color * power *  traceSecondary(&r, bounce+1);
-	}*/
+		return color * power *  traceSecondary(&r, bounce+1);
+	}
 
 	{
 		//Diffuse
