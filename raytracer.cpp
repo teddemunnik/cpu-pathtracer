@@ -131,17 +131,12 @@ void Triangle::intersectSecondary(Ray* _Ray) const{
 
 // == Camera class ============================================================
 //    ------------
-float3 rotated(const float3& in, const float3& fwd){
-	//Find major axis of forward vector 
-	const float3 forward(-fwd.x, -fwd.y, fwd.z);
-	const float3 right=Cross(float3(0,1,0),forward);
-	const float3 up=Cross(forward, right);
-	return float3(
-		Dot(right, in),
-		Dot(up, in),
-		Dot(forward, in)
-	);
-}
+Camera::Camera() :
+	m_Transform(float4x4::Identity()),
+	m_ApertureSize(0.0f),
+	m_FocalDistance(1.0f)
+{}
+Camera::~Camera(){}
 float4x4 Camera::transform() const{
 	return m_Transform;
 }
@@ -151,16 +146,22 @@ void Camera::setTransform(const float4x4& transform){
 }
 void Camera::_invalidate(){
 	const float aspect = SCRWIDTH/(float)SCRHEIGHT;
-	p1 = *(float3*)&(m_Transform * float4( -0.5f*aspect, 0.5f, 1,  1.0f));
-	p2 = *(float3*)&(m_Transform * float4(  0.5f*aspect, 0.5f, 1,  1.0f));
-	p3 = *(float3*)&(m_Transform * float4(  0.5f*aspect, -0.5f, 1, 1.0f));
-	p4 = *(float3*)&(m_Transform * float4( -0.5f*aspect, -0.5f, 1, 1.0f));
+	p1 = *(float3*)&(m_Transform * float4(m_FocalDistance * float3(-0.5f*aspect, 0.5f, 1),  1.0f));
+	p2 = *(float3*)&(m_Transform * float4(m_FocalDistance * float3( 0.5f*aspect, 0.5f, 1),  1.0f));
+	p3 = *(float3*)&(m_Transform * float4(m_FocalDistance * float3( 0.5f*aspect, -0.5f, 1), 1.0f));
+	p4 = *(float3*)&(m_Transform * float4(m_FocalDistance * float3(-0.5f*aspect, -0.5f, 1), 1.0f));
 }
 void Camera::set( float3 _Pos, float3 _Rotation )
 {
 	// set position and view direction, then calculate screen corners
 	float4x4 tmp = float4x4::Rotate(_Rotation) * float4x4::Translate(_Pos);
 	setTransform(tmp);
+}
+void Camera::setAperture(float apertureSize, float focalDist){
+	if(focalDist <= EPSILON) focalDist = EPSILON;
+	m_ApertureSize = MAX(0.0f, apertureSize);
+	m_FocalDistance = focalDist;
+	_invalidate();
 }
 void Camera::GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y){
 	//Constants defining the layout of the simd packet, [ a, b ]
@@ -180,10 +181,10 @@ void Camera::GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y){
 				randf_oo()*2-1,
 				randf_oo()*2-1,
 				randf_oo()*2-1
-			)*0.025f;
-			_Rays->Ox4[i] = _mm_add_ps(diffuseRays.Cr4, _mm_set1_ps(dofRand.x));
-			_Rays->Oy4[i] = _mm_add_ps(diffuseRays.Cr4, _mm_set1_ps(dofRand.y));
-			_Rays->Oz4[i] = _mm_add_ps(diffuseRays.Cr4, _mm_set1_ps(dofRand.z));
+			)*m_ApertureSize;
+			_Rays->Ox4[i] = _mm_add_ps(_Rays->Ox4[i], _mm_set1_ps(dofRand.x));
+			_Rays->Oy4[i] = _mm_add_ps(_Rays->Oy4[i], _mm_set1_ps(dofRand.y));
+			_Rays->Oz4[i] = _mm_add_ps(_Rays->Oz4[i], _mm_set1_ps(dofRand.z));
 		#endif
 		
 		//Normalized screen coordinates
@@ -231,18 +232,37 @@ void Camera::GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y){
 	const float downOffs = (((_Y+1)*PrimaryRayBundle::kHeight)/(float)SCRHEIGHT);
 	const float3 hdir = (p2-p1);
 	const float3 vdir = (p4-p1);
-	const float3 c1 = Normalize(p1 + leftOffs*hdir + upOffs*vdir    - pos);
-	const float3 c2 = Normalize(p1 + rightOffs*hdir + upOffs*vdir   - pos);
-	const float3 c3 = Normalize(p1 + rightOffs*hdir + downOffs*vdir - pos);
-	const float3 c4 = Normalize(p1 + leftOffs*hdir + downOffs*vdir  - pos);
-	const float3 p0 = Cross(c1, c2);
-	const float3 p1 = Cross(c2, c3);
-	const float3 p2 = Cross(c3, c4);
-	const float3 p3 = Cross(c4, c1);
+
+
+	//Extract rotation
+	float4x4 rotation = transform();
+	rotation.x.w=0;
+	rotation.y.w=0;
+	rotation.z.w=0;
+	rotation.w = float4(0,0,0,1);
+	float3 poss[4] = {
+		(rotation * float4(-m_ApertureSize, m_ApertureSize, 0.0f, 0.0f)).xyz,
+		(rotation * float4(m_ApertureSize, m_ApertureSize, 0.0f, 0.0f)).xyz,
+		(rotation * float4(m_ApertureSize, -m_ApertureSize, 0.0f, 0.0f)).xyz,
+		(rotation * float4(-m_ApertureSize, -m_ApertureSize, 0.0f, 0.0f)).xyz
+	};
+
+	const float3 c1 = Normalize(p1 + leftOffs*hdir + upOffs*vdir    - (pos - poss[0]));
+	const float3 c2 = Normalize(p1 + rightOffs*hdir + upOffs*vdir   - (pos - poss[1]));
+	const float3 c3 = Normalize(p1 + rightOffs*hdir + downOffs*vdir - (pos - poss[2]));
+	const float3 c4 = Normalize(p1 + leftOffs*hdir + downOffs*vdir  - (pos - poss[3]));
+	const float3 p0 = Normalize(Cross(c1, c2));
+	const float3 p1 = Normalize(Cross(c2, c3));
+	const float3 p2 = Normalize(Cross(c3, c4));
+	const float3 p3 = Normalize(Cross(c4, c1));
 	_Rays->fx4 = _mm_set_ps(p3.x, p2.x, p1.x, p0.x);
 	_Rays->fy4 = _mm_set_ps(p3.y, p2.y, p1.y, p0.y);
 	_Rays->fz4 = _mm_set_ps(p3.z, p2.z, p1.z, p0.z);
-	_Rays->fd4 = _mm_set_ps(Dot(pos, p3), Dot(pos, p2), Dot(pos, p1), Dot(pos, p0));
+	_Rays->fd4 = _mm_set_ps(
+					Dot(pos + poss[3], p3), 
+					Dot(pos + poss[2], p2), 
+					Dot(pos + poss[1], p1), 
+					Dot(pos + poss[0], p0));
 
 	//Calc offsets to nearest vector on AABB for each plane
 	const unsigned int* signPtr = (const unsigned int*)&_Rays->fx4;
@@ -480,7 +500,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene2.txt");
+	m_Scene.load("assets/scene.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];

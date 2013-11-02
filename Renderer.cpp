@@ -58,11 +58,11 @@ void Renderer::init(){
 	m_DefaultShaderSamples = m_DefaultShader.uniformLocation("_MainTexSamples");
 
 	//Post FX
-	//BloomFX* bloom = new BloomFX;
-	//m_Effects.push_back(bloom);
+	BloomFX* bloom = new BloomFX;
+	m_Effects.push_back(bloom);
 
-	//ChromaticAberationFX* chromab = new ChromaticAberationFX;
-	//m_Effects.push_back(chromab);
+	ChromaticAberationFX* chromab = new ChromaticAberationFX;
+	m_Effects.push_back(chromab);
 }
 void Renderer::destroy(){
 	glDeleteTextures(2, m_FrameBufferTextures);

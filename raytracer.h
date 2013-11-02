@@ -8,7 +8,7 @@
 #include "surface.h"
 #include <tt/jobsystem/jobsystem.h>
 
-#define FEATURE_DOF_ENABLED 0
+#define FEATURE_DOF_ENABLED 1
 #define FEATURE_AA_ENABLED 1
 #define FEATURE_SKYBOX_ENABLED 1
 
@@ -112,11 +112,18 @@ class Camera
 {
 private:
 	float4x4 m_Transform;
+	float m_ApertureSize;
+	float m_FocalDistance;
+
 	void _invalidate();
 public:
+	Camera();
+	~Camera();
 	float4x4 transform() const;
 	void setTransform(const float4x4& transform);
 	void set( float3 _Pos, float3 _Direction );
+	//Depth of field settings; aperture of 0 is no depth of field
+	void setAperture(float apertureSize, float focalDistance);
 	void GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y);
 
 

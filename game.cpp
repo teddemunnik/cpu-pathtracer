@@ -20,8 +20,11 @@ Renderer renderer;
 
 float3 g_CameraPosition(0,0,-4);
 float3 g_CameraRotation(0,0,0);
+float g_FocalDist = 5.0f;
+float g_ApertureSize = 0.0f;
 bool g_KeyState[512];
 
+TwBar* g_Bar;
 
 void Game::Init()
 {
@@ -30,6 +33,10 @@ void Game::Init()
 	tracer.init();
 	renderer.init();
 	renderer.setTracer(&tracer);
+
+	g_Bar = TwNewBar("Camera Setting");
+	TwAddVarRO(g_Bar, "Aperture size[+/-]", TW_TYPE_FLOAT, &g_ApertureSize, nullptr);
+	TwAddVarRO(g_Bar, "Focal Distance[pageup/pagedown]", TW_TYPE_FLOAT, &g_FocalDist, nullptr);
 
 }
 void Game::KeyUp(unsigned int keycode){
@@ -75,6 +82,25 @@ void Game::Tick( float a_DT )
 		g_CameraRotation.x += rotation.x*a_DT;
 		g_CameraRotation.y += rotation.y*a_DT;
 	}
+
+
+	//Focal distance
+	float focalDist = 0.0f;
+	if(g_KeyState[SDL_SCANCODE_PAGEUP]) focalDist += a_DT;
+	if(g_KeyState[SDL_SCANCODE_PAGEDOWN]) focalDist -= a_DT;
+	
+	//Aperture size
+	float deltaAperture = 0.0f;
+	if(g_KeyState[SDL_SCANCODE_MINUS]) deltaAperture -= a_DT*0.05f;
+	if(g_KeyState[SDL_SCANCODE_EQUALS]) deltaAperture += a_DT*0.05f;
+
+	if(fabsf(focalDist) > 0.0001f || fabsf(deltaAperture) > 0.0001f){
+		g_FocalDist += focalDist;
+		g_ApertureSize += deltaAperture;
+		tracer.camera().setAperture(g_ApertureSize, g_FocalDist);
+		tracer.clear();
+	}
+
 
 	//save to file
 	if(g_KeyState[SDLK_SPACE]){

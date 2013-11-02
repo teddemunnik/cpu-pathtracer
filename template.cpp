@@ -100,7 +100,7 @@ void swap()
 {
 	game->Draw();
 
-	//TwDraw();
+	TwDraw();
 	SDL_GL_SwapWindow(g_Window);
 }
 
