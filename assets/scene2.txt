@@ -4,3 +4,9 @@ scene["lambert2SG"] = {
 	light: 1.0f,
 	intensity: 5.0f
 };
+
+Model glass = "assets/sphere.obj";
+glass["sphere:initialShadingGroup"] = {
+	refr: 1.0f,
+	refrIndex: 1.6f
+};

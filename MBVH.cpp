@@ -15,7 +15,12 @@ MBVHNode::MBVHNode(){
 	for(int i=0; i<4; ++i) children[i] = nullptr;
 }
 MBVHNode::~MBVHNode(){
-
+	if(children[0]){
+		delete children[0];
+		delete children[1];
+		delete children[2];
+		delete children[3];
+	}
 }
 void MBVHNode::fromBvh(const class BVHNode& root){
 	_fill(root);
@@ -46,6 +51,9 @@ void MBVHNode::_fill(const BVHNode& node){
 				children[i] = new MBVHNode;
 				children[i]->_fill(*nodes[i]);
 			}
+		}else{
+			children[i]->primCount = 0;
+			children[i]->primList = nullptr;
 		}
 	}
 	

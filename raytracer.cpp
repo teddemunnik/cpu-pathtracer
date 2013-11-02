@@ -478,7 +478,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene.txt");
+	m_Scene.load("assets/scene2.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
@@ -623,9 +623,6 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 			refl = refl + Wr * refr;
 			refr = Wt * refr;
 		}
-		if(bounce > 0){
-			return float3(ddn, ddn, ddn);
-		}
 	}*/
 	const float path = randf_oo();
 	//Reflection
@@ -641,13 +638,13 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 
 	//Refraction
 	/*if(path < refl+refr){
-		const float3 D = nnt * _Ray->D - normal * (nnt*ddn - sqrtf(cosT2));
+		const float3 D = Normalize(nnt * _Ray->D - normal * (nnt*ddn - sqrtf(cosT2)));
 		Ray r;
 		r.O = _Ray->O + _Ray->D * _Ray->t + D * EPSILON;
 		r.D = D;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * power *  traceSecondary(&r, bounce+1);
+		//return color * power *  traceSecondary(&r, bounce+1);
 	}*/
 
 	{
