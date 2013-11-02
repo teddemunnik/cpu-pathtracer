@@ -1,4 +1,4 @@
-newmtl lambert2SG
+newmtl initialShadingGroup
 illum 4
 Kd 1.00 1.00 1.00
 Ka 0.00 0.00 0.00
@@ -91,7 +91,7 @@ map_Ka VRATA_KR.JPG
 bump VRATA_KR.JPG -bm 0
 Ni 1.50
 Ks 0.00 0.00 0.00
-Ns 17.59
+Ns 0.00
 newmtl sponza:sp_00_zid
 illum 4
 Kd 0.00 0.00 0.00

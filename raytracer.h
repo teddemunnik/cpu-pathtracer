@@ -92,9 +92,9 @@ private:
 	Triangle* primList;
 	int primCount;
 
-	//MBVH primitives
-	Triangle* primList2;
 public:
+		//HDR Skybox
+	class HDRSurface* skytexture;
 	Scene();
 	~Scene();
 	void load(const char* path);

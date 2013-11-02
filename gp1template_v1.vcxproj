@@ -126,6 +126,7 @@
     <ClCompile Include="BVH.cpp" />
     <ClCompile Include="ChromaticAberationFX.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="HDRSurface.cpp" />
     <ClCompile Include="MBVH.cpp" />
     <ClCompile Include="mtrand.cpp" />
     <ClCompile Include="raytracer.cpp" />
@@ -140,6 +141,7 @@
     <ClInclude Include="BVH.h" />
     <ClInclude Include="ChromaticAberationFX.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="HDRSurface.h" />
     <ClInclude Include="MBVH.h" />
     <ClInclude Include="mtrand.h" />
     <ClInclude Include="OBJLoader.h" />

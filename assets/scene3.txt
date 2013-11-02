@@ -1,5 +1,5 @@
 Model sponza = "assets/sponza/sponza.obj";
-sponza["lambert2SG"] = {
+sponza["initialShadingGroup"] = {
 	light: 1.0f,
 	intensity: 10.0f
 };

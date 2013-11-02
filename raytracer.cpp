@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <gl/glew.h>
 #include "SceneImporter.h"
+#include "HDRSurface.h"
 
 using namespace Tmpl8;
 
@@ -390,6 +391,8 @@ void Scene::load(const char* path){
 
 	mbvhRoot.fromBvh(root);
 
+	//Sky texture
+	skytexture = new HDRSurface("assets/sky.hdr");
 	
 }
 void Scene::LoadOBJ(Model* model){
@@ -611,8 +614,16 @@ float3 getColorAtIP(Ray& _Ray){
 		return _Ray.prim->material->color;
 	}
 }
+float3 sampleEnvironment(HDRSurface& surf, Ray& _Ray){
+	const float u = fmodf(0.5f * (1.0f + atan2(_Ray.D.x, -_Ray.D.z) / PI), 1.0f);
+	const float v = fmodf(1000.0f + acosf(_Ray.D.y) / PI, 1.0f);
+	const int pixel = (int)(u * (float)surf.width()) + ((int)(v * (float)surf.height()) * surf.width());
+	return *reinterpret_cast<const float3*>(&surf.buffer()[pixel]);
+}
 float3 Tracer::trace(Ray* _Ray, float power, int bounce){
-	if(!_Ray->prim || !_Ray->prim->material) return float3(0,0,0);
+	if(!_Ray->prim) return scene().skytexture ? sampleEnvironment(*scene().skytexture, *_Ray) : float3(0,0,0);
+	if(!_Ray->prim->material) return float3(0,0,0);
+
 	const Material& mat = *_Ray->prim->material;
 	float3 color = getColorAtIP(*_Ray);
 	if(m_Simple){

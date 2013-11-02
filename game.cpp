@@ -152,29 +152,4 @@ void drawNode_r(BVHNode& node, int level=0){
 }
 void Game::Draw(){
 	renderer.render();
-	
-	/*glPushAttrib(GL_TRANSFORM_BIT|GL_POLYGON_BIT|GL_ENABLE_BIT|GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	const double persp = 2*atan(0.5)*180.0/PI;
-	gluPerspective(persp, SCRWIDTH/(double)SCRHEIGHT, 0.01, 100.0);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glScalef(1, 1, -1);//convert to right handed coordinate system
-	glRotatef(-g_CameraRotationY*180/PI, 0, 1, 0);
-	glTranslatef(-g_CameraPosition.x, -g_CameraPosition.y, -g_CameraPosition.z);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	drawNode_r(*tracer.scene.root);
-
-
-	//Clean up after drawing
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glPopAttrib();*/
 }
