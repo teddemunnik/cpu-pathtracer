@@ -19,7 +19,7 @@ Tracer tracer;
 Renderer renderer;
 
 float3 g_CameraPosition(0,0,-4);
-float g_CameraRotationY, g_CameraRotationX;
+float3 g_CameraRotation(0,0,0);
 bool g_KeyState[512];
 
 
@@ -50,7 +50,15 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 
 		if(SQRLENGTH(movement) > 1) Normalize(movement);
-		g_CameraPosition+=movement*a_DT;
+
+		//Extract rotation matrix
+		float4x4 transform = tracer.camera().transform();
+		transform.w = float4(0,0,0,1);
+		transform.x.w = 0;
+		transform.y.w = 0;
+		transform.z.w = 0;
+
+		g_CameraPosition+= (transform *  float4(movement*a_DT, 0.0f)).xyz;
 	}
 
 
@@ -64,27 +72,16 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 
 		if(SQRLENGTH(rotation) > 1) Normalize(movement);
-		g_CameraRotationX += rotation.x*a_DT;
-		g_CameraRotationY += rotation.y*a_DT;
+		g_CameraRotation.x += rotation.x*a_DT;
+		g_CameraRotation.y += rotation.y*a_DT;
 	}
 
 	//save to file
 	if(g_KeyState[SDLK_SPACE]){
 		m_Surface->SaveImage("output.jpg");
 	}
-
-	const float cosz = cosf(0);
-	const float sinz = sinf(0);
-	const float cosx = cosf(g_CameraRotationX);
-	const float sinx = sinf(g_CameraRotationX);
-	const float cosy = cosf(g_CameraRotationY);
-	const float siny = sinf(g_CameraRotationY);
-	float3 forward;
-	forward.x = cosx*siny;
-	forward.y = sinx;
-	forward.z = cosx*cosy;
-
-	tracer.camera().Set(g_CameraPosition, forward);
+	
+	tracer.camera().set(g_CameraPosition, g_CameraRotation);
 }
 
 void drawNode_r(BVHNode& node, int level=0){

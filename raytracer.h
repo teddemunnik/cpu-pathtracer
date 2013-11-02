@@ -110,14 +110,16 @@ public:
 };
 class Camera
 {
+private:
+	float4x4 m_Transform;
+	void _invalidate();
 public:
-
-	// methods
-	void Set( float3 _Pos, float3 _Direction );
+	float4x4 transform() const;
+	void setTransform(const float4x4& transform);
+	void set( float3 _Pos, float3 _Direction );
 	void GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y);
-	// data members
-	float3 pos;						// camera position
-	float3 V;						// normalized view direction
+
+
 	float3 p1, p2, p3, p4;			// corners of screen plane
 };
 class Material{

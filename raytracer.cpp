@@ -141,22 +141,32 @@ float3 rotated(const float3& in, const float3& fwd){
 		Dot(forward, in)
 	);
 }
-void Camera::Set( float3 _Pos, float3 _Direction )
+float4x4 Camera::transform() const{
+	return m_Transform;
+}
+void Camera::setTransform(const float4x4& transform){
+	m_Transform = transform;
+	_invalidate();
+}
+void Camera::_invalidate(){
+	const float aspect = SCRWIDTH/(float)SCRHEIGHT;
+	p1 = *(float3*)&(m_Transform * float4( -0.5f*aspect, 0.5f, 1,  1.0f));
+	p2 = *(float3*)&(m_Transform * float4(  0.5f*aspect, 0.5f, 1,  1.0f));
+	p3 = *(float3*)&(m_Transform * float4(  0.5f*aspect, -0.5f, 1, 1.0f));
+	p4 = *(float3*)&(m_Transform * float4( -0.5f*aspect, -0.5f, 1, 1.0f));
+}
+void Camera::set( float3 _Pos, float3 _Rotation )
 {
 	// set position and view direction, then calculate screen corners
-	pos = _Pos;
-	V = _Direction;
-	float aspect = SCRWIDTH/(float)SCRHEIGHT;
-	p1 = pos + 2*rotated(float3( -0.5f*aspect, 0.5f, 1), V);
-	p2 = pos + 2*rotated(float3(  0.5f*aspect, 0.5f, 1), V);
-	p3 = pos + 2*rotated(float3(  0.5f*aspect, -0.5f, 1), V);
-	p4 = pos + 2*rotated(float3( -0.5f*aspect, -0.5f, 1), V);
+	float4x4 tmp = float4x4::Rotate(_Rotation) * float4x4::Translate(_Pos);
+	setTransform(tmp);
 }
 void Camera::GenerateRays( PrimaryRayBundle* _Rays, int _X, int _Y){
 	//Constants defining the layout of the simd packet, [ a, b ]
 	//													[ c, d ]
 	const static __m128i kSIMDXOffsets4 = _mm_set_epi32(1, 0, 1, 0);
 	const static __m128i kSIMDYOffsets4 = _mm_set_epi32(1, 1, 0, 0);
+	const float3 pos(m_Transform.w.x, m_Transform.w.y, m_Transform.w.z);
 	for(int i=0; i<PrimaryRayBundle::kPackedCount; ++i){
 		//Ray origin
 		_Rays->Ox4[i] = _mm_set1_ps(pos.x);
@@ -461,7 +471,7 @@ Tracer::Tracer() :
 	m_FpCount(0)
 {
 	seed(50);
-	m_Camera.Set( float3( 0, 0, -4 ), Normalize(float3( 0,0,1 ) ));
+	m_Camera.set( float3( 0, 0, -3 ), float3( 0,180,0 ) );
 
 	m_FpBuffer = new float3a[SCRWIDTH*SCRHEIGHT];
 	clear();
