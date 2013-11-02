@@ -468,7 +468,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene.txt");
+	m_Scene.load("assets/scene2.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
@@ -516,45 +516,138 @@ void Tracer::trace(int tileIdx){
 void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 	m_Scene.intersectPrimary(_Rays);
 
-	for(int i=0; i<PrimaryRayBundle::kRayCount; ++i){
-		const Triangle* tri = _Rays->prim[i];
-		if(!tri) continue;
-		const Material* mat = tri->material;
-
-		if(mat->light > 0.0001f){
-			m_FpBuffer[_Rays->addr[i]] += mat->color;
-			continue;
-		}
-
-		const float3 normal = tri->n0 + _Rays->u[i] * (tri->n1-tri->n0) + _Rays->v[i] * (tri->n2-tri->n0);
-		const float3 O = float3(_Rays->Ox4[i/4].m128_f32[i%4], _Rays->Oy4[i/4].m128_f32[i%4], _Rays->Oz4[i/4].m128_f32[i%4]);
-		const float3 D = float3(_Rays->Dx4[i/4].m128_f32[i%4], _Rays->Dy4[i/4].m128_f32[i%4], _Rays->Dz4[i/4].m128_f32[i%4]);
-
-		Ray reflect;
-		reflect.O = O + D * _Rays->t[i];
-		reflect.D = Reflect(D, normal);
-		reflect.O += reflect.D * EPSILON;
-		reflect.t = 1e34f;
-		reflect.prim = nullptr;
-
-
-		if(tri && tri->material){
-			m_FpBuffer[_Rays->addr[i]] += traceSecondary(&reflect);
+	for(int i=0; i<PrimaryRayBundle::kPackedCount; ++i){
+		for(int j=0; j<4; ++j){
+			Ray ray;
+			ray.O = float3(_Rays->Ox4[i].m128_f32[j], _Rays->Oy4[i].m128_f32[j], _Rays->Oz4[i].m128_f32[j]);
+			ray.D = float3(_Rays->Dx4[i].m128_f32[j], _Rays->Dy4[i].m128_f32[j], _Rays->Dz4[i].m128_f32[j]);
+			ray.t  = _Rays->t4[i].m128_f32[j];
+			ray.u = _Rays->u4[i].m128_f32[j];
+			ray.v = _Rays->v4[i].m128_f32[j];
+			ray.prim = (Triangle*)_Rays->prim4[i].m128i_i32[j];
+			m_FpBuffer[_Rays->addr4[i].m128i_i32[j]] += trace(&ray, 0);
 		}
 	}
 }
-float3 Tracer::traceSecondary(Ray* _Ray){
+float3 Tracer::traceSecondary(Ray* _Ray, int bounce){
+	if(bounce >= 4) return float3(0,0,0);
 	m_Scene.intersectSecondary(_Ray);
-	return float3(_Ray->t, _Ray->t, _Ray->t)/10.0f;
-	const Triangle* tri = _Ray->prim;
-	if(!tri) return float3(0,0,0);
-	const Material* mat = tri->material;
-	if(!mat) return float3(0,0,0);
+	return trace(_Ray, bounce);
+}
+float3 DiffuseDirection(const float3& normal){
+	const float3 absNormal(fabsf(normal.x), fabsf(normal.y), fabsf(normal.z));
+	float3 axis(0,0,1);
+	if(absNormal.x <= absNormal.y && absNormal.y <= absNormal.z){
+		axis = float3(1,0,0);
+	}else if(absNormal.y <= absNormal.x && absNormal.y <= absNormal.z){
+		axis = float3(0,1,0);
+	}
+	const float3 u1 = Cross(axis, normal);
+	const float3 u2 = Cross(u1, normal);
+	const float rand1 = randf_oo();
+	const float tmp1 = sqrtf(1.0f - rand1);
+	const float tmp2 = 2.0f * PI * randf_oo();
 
-	const float3 normal = tri->n0 + _Ray->u * (tri->n1-tri->n0) + _Ray->v * (tri->n2-tri->n0);
-	return normal;
+	const float3 dir = u1 * (cosf(tmp2) * tmp1) +
+						u2 * (sinf(tmp2) * tmp1) +
+						normal * sqrtf(rand1);
+	return Dot(dir, normal) > 0 ? dir : dir * -1.0f;
+}
+float3 getColorAtIP(Ray& _Ray){
+	if(_Ray.prim->material->texture){
+		Surface& tex = *_Ray.prim->material->texture;
+		const float2 uv = _Ray.prim->uv0 + _Ray.u * (_Ray.prim->uv1-_Ray.prim->uv0) + _Ray.v * (_Ray.prim->uv2-_Ray.prim->uv0);
+		const float2 nuv(fmodf(uv.x+1000.0f, 1.0f), fmodf(uv.y+1000.0f, 1.0f));
+		const int x = (int)(nuv.x * (float)(tex.GetWidth()-1));
+		const int y =  tex.GetHeight() - 1 - (int)(nuv.y * (float)(tex.GetHeight()-1));
+		const Pixel color =tex.GetBuffer()[y*tex.GetPitch()+x];
+		return float3(
+			(float)((color >> 16)&0xff),
+			(float)((color >> 8)&0xff),
+			(float)((color)&0xff)
+		)/255.0f;
+	}else{
+		return _Ray.prim->material->color;
+	}
+}
+float3 Tracer::trace(Ray* _Ray, int bounce){
+	if(!_Ray->prim || !_Ray->prim->material) return float3(0,0,0);
+	const Material& mat = *_Ray->prim->material;
 
+	//Light
+	const float3 color = getColorAtIP(*_Ray);
+	if(mat.light>EPSILON){
+		return color;
+	}
 
+	//Fresnel
+	float3 normal = _Ray->prim->n0 + _Ray->u * (_Ray->prim->n1-_Ray->prim->n0) + _Ray->v  * (_Ray->prim->n2-_Ray->prim->n0);
+	float nt, nnt, ddn, cosT2;
+	float refl = mat.refl;
+	float refr = mat.refr;
+	if(mat.refr > EPSILON){
+		ddn = Dot(normal, _Ray->D);
+		if(ddn > 0){
+			nt = mat.refrIndex;
+			nnt = 1.0f/nt;
+		}else{
+			normal = -normal;
+			nnt = mat.refrIndex;
+			nt = 1.0f/nnt;
+			ddn = -ddn;
+		}
+
+		cosT2 = 1.0f - nnt*nnt * (1.0f - ddn*ddn);
+		if(cosT2 <= 0){
+			refl += refr;
+			refr = 0.0f;
+		}else{
+			const float v = ((nt-1)*(nt-1)) / ((nt+1)*(nt+1));
+			const float c1 = (1-ddn);
+			const float Wr =  v  + (1-v)*c1*c1*c1*c1*c1;
+			const float Wt = 1 - Wr;
+			refl = refl + Wr * refr;
+			refr = Wt * refr;
+		}
+		if(bounce > 0){
+			return float3(ddn, ddn, ddn);
+		}
+	}
+	const float path = randf_oo();
+	//Reflection
+	if(path < refl){
+		Ray r;
+		r.O = _Ray->O + _Ray->D * _Ray->t;
+		r.D = Reflect(_Ray->D, normal);
+		r.O += r.D*EPSILON;
+		r.t = 1e34f;
+		r.prim = nullptr;
+		return color * traceSecondary(&r, bounce+1);
+	}
+
+	//Refraction
+	if(path < refl+refr){
+		const float3 D = nnt * _Ray->D - normal * (nnt*ddn - sqrtf(cosT2));
+		Ray r;
+		r.O = _Ray->O + _Ray->D * _Ray->t + D * EPSILON;
+		r.D = D;
+		r.t = 1e34f;
+		r.prim = nullptr;
+		return color * traceSecondary(&r, bounce+1);
+	}
+
+	{
+		//Diffuse
+		const float3 dir = DiffuseDirection(normal);
+
+		Ray r;
+		r.O = _Ray->O + _Ray->D * _Ray->t;
+		r.D = dir;
+		r.O += r.D*EPSILON;
+		r.t = 1e34f;
+		r.prim = nullptr;
+		return color * traceSecondary(&r, bounce+1);
+	}
 }
 Camera& Tracer::camera(){
 	return m_Camera;

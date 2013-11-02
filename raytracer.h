@@ -122,6 +122,7 @@ public:
 };
 class Material{
 public:
+	Material() : texture(nullptr), refl(0.0f), refr(0.0f), refrIndex(0.0f), light(0.0f){}
 	float3 color;
 	Surface* texture;
 	float refl;
@@ -162,8 +163,8 @@ public:
 
 	void trace(int tileIdx);
 	void tracePrimary(PrimaryRayBundle* _Rays);
-	float3 traceSecondary(Ray* _Ray);
-	void trace(Ray* _Ray);
+	float3 traceSecondary(Ray* _Ray, int bounce=0);
+	float3 trace(Ray* _Ray, int bounce=0);
 
 	Scene& scene();
 	Camera& camera();
