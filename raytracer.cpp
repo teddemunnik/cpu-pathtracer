@@ -435,6 +435,7 @@ void Scene::LoadOBJ(Model* model){
 				finalMaterials[index]->refl = g->refl;
 				finalMaterials[index]->refrIndex = g->refrIndex;
 				finalMaterials[index]->light = g->light;
+				finalMaterials[index]->absorption = g->absorption;
 			}
 		}
 
@@ -607,7 +608,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 			nt = 1.0f/nnt;		
 
 			//Exiting ray (color is beers law)
-			const float c1 = -5.0f * _Ray->t;
+			const float c1 = mat.absorption * -_Ray->t;
 			color = float3(expf(c1*(1.0f-color.x)), expf(c1*(1.0f-color.y)), expf(c1*(1.0f-color.z)));
 		}else{
 			normal = -normal;
@@ -615,7 +616,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 			nt = mat.refrIndex;
 			nnt = 1.0f/nt;
 
-			//Ingoing ray
+			//Ingoing ray (no energy loss, will be handled when the ray goes out)
 			color = float3(1,1,1);
 		}
 

@@ -102,6 +102,12 @@ struct Variable{
 				float& r = *reinterpret_cast<float*>(intensityIt->second->data);
 				g->intensity = r;
 			}
+
+			auto absorptionIt = obj->keys.find("absorption");
+			if(absorptionIt != obj->keys.end() && absorptionIt->second->type == kTypeNumber && absorptionIt->second->data != nullptr){
+				float& r = *reinterpret_cast<float*>(absorptionIt->second->data);
+				g->absorption = r;
+			}
 			return true;
 		}
 

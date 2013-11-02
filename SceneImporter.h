@@ -17,6 +17,7 @@ struct Group{
 	float refr;
 	float refrIndex;
 	float light;
+	float absorption;
 	
 };
 

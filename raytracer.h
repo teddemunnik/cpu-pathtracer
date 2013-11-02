@@ -131,6 +131,7 @@ public:
 	float refr;
 	float refrIndex;
 	float light;
+	float absorption;
 };
 
 // == class Tracer ==========================================================
