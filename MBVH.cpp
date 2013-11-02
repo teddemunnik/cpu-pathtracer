@@ -26,6 +26,7 @@ void MBVHNode::fromBvh(const class BVHNode& root){
 	_fill(root);
 }
 void MBVHNode::_fill(const BVHNode& node){
+	if(!node.m_Left) return;
 	const BVHNode* nodes[4] = {
 		node.m_Left->m_Left ? node.m_Left->m_Left : node.m_Left,
 		node.m_Left->m_Left ? node.m_Left->m_Right : nullptr,

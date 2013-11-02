@@ -500,7 +500,7 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene.txt");
+	m_Scene.load("assets/scene3.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];

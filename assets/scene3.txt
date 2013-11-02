@@ -1,0 +1,5 @@
+Model sponza = "assets/sponza/sponza.obj";
+sponza["lambert2SG"] = {
+	light: 1.0f,
+	intensity: 5.0f
+};
