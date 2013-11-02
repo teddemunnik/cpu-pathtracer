@@ -589,7 +589,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	float nt, nnt, ddn, cosT2;
 	float refl = mat.refl;
 	float refr = mat.refr;
-	if(mat.refr > EPSILON){
+	/*if(mat.refr > EPSILON){
 		ddn = Dot(normal, _Ray->D);
 		if(ddn > 0){
 			nt = mat.refrIndex;
@@ -616,7 +616,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		if(bounce > 0){
 			return float3(ddn, ddn, ddn);
 		}
-	}
+	}*/
 	const float path = randf_oo();
 	//Reflection
 	if(path < refl){
@@ -630,7 +630,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	}
 
 	//Refraction
-	if(path < refl+refr){
+	/*if(path < refl+refr){
 		const float3 D = nnt * _Ray->D - normal * (nnt*ddn - sqrtf(cosT2));
 		Ray r;
 		r.O = _Ray->O + _Ray->D * _Ray->t + D * EPSILON;
@@ -638,7 +638,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		r.t = 1e34f;
 		r.prim = nullptr;
 		return color * power *  traceSecondary(&r, bounce+1);
-	}
+	}*/
 
 	{
 		//Diffuse

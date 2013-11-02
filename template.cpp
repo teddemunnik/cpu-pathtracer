@@ -150,15 +150,15 @@ int main( int argc, char **argv )
 	game->Init();
 	while (!exitapp) 
 	{
-		swap();
-
-		
 		// calculate frame time and pass it to game->Tick
 		LARGE_INTEGER start, end;
 		QueryPerformanceCounter( &start );
+		swap();
 		game->Tick( (float)lastftime );
-		QueryPerformanceCounter( &end );
-		lastftime = float((end.QuadPart - start.QuadPart ) * 1000) / (float)ticksPS.QuadPart;
+
+
+
+
 		// event loop
 		SDL_Event event;
 		while (SDL_PollEvent( &event )) 
@@ -196,6 +196,8 @@ int main( int argc, char **argv )
 			}
 		}
 		}
+		QueryPerformanceCounter( &end );
+		lastftime = float((end.QuadPart - start.QuadPart ))  / (float)ticksPS.QuadPart;
 	}
 	TwTerminate();
 	SDL_Quit();

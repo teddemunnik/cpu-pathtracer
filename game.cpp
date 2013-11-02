@@ -50,7 +50,7 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 
 		if(SQRLENGTH(movement) > 1) Normalize(movement);
-		g_CameraPosition+=movement*a_DT*0.1f;
+		g_CameraPosition+=movement*a_DT;
 	}
 
 
@@ -64,8 +64,8 @@ void Game::Tick( float a_DT )
 		tracer.clear();
 
 		if(SQRLENGTH(rotation) > 1) Normalize(movement);
-		g_CameraRotationX += rotation.x*a_DT*0.1f;
-		g_CameraRotationY += rotation.y*a_DT*0.1f;
+		g_CameraRotationX += rotation.x*a_DT;
+		g_CameraRotationY += rotation.y*a_DT;
 	}
 
 	//save to file
@@ -85,7 +85,6 @@ void Game::Tick( float a_DT )
 	forward.z = cosx*cosy;
 
 	tracer.camera().Set(g_CameraPosition, forward);
-	
 }
 
 void drawNode_r(BVHNode& node, int level=0){
