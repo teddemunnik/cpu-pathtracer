@@ -18,7 +18,7 @@ using namespace Tmpl8;
 Tracer tracer;
 Renderer renderer;
 
-float3 g_CameraPosition(0,0,-4);
+float3 g_CameraPosition(0,0,-2);
 float3 g_CameraRotation(0,0,0);
 float g_FocalDist = 5.0f;
 float g_ApertureSize = 0.0f;

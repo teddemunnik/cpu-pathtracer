@@ -11,6 +11,7 @@
 #define FEATURE_DOF_ENABLED 1
 #define FEATURE_AA_ENABLED 1
 #define FEATURE_SKYBOX_ENABLED 1
+#define FEATURE_BILINEAR_ENABLED 1
 
 
 #define DOT128(ax,ay,az,bx,by,bz) _mm_add_ps(_mm_add_ps(_mm_mul_ps(ax, bx), _mm_mul_ps(ay, by)), _mm_mul_ps(az, bz))
@@ -146,9 +147,9 @@ public:
 class TraceJob : public IJob{
 public:
 	class Tracer* tracer;
-	int start, end;
 	void run();
 };
+
 class Tracer
 {
 public:
@@ -163,9 +164,11 @@ private:
 	Scene m_Scene;
 	Camera m_Camera;
 
+	//Multithreading
 	JobManager m_JobManager;
 	JobGroup m_Jobs;
 	TraceJob* m_JobPtrs;
+	__declspec(align(32)) LONG m_CurrentTileId;
 
 	bool m_Simple;
 
@@ -178,7 +181,7 @@ public:
 	void clear();
 	void render();
 
-	void trace(int tileIdx);
+	bool traceNext();
 	void tracePrimary(PrimaryRayBundle* _Rays);
 	float3 traceSecondary(Ray* _Ray, int bounce=0);
 	float3 trace(Ray* _Ray, float power, int bounce=0);

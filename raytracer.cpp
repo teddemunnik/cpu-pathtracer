@@ -496,7 +496,7 @@ Tracer::Tracer() :
 	m_FpCount(0)
 {
 	seed(50);
-	m_Camera.set( float3( 0, 0, -3 ), float3( 0,180,0 ) );
+	m_Camera.set( float3( 0, 0, -2 ), float3( 0,180,0 ) );
 
 	m_FpBuffer = new float3a[SCRWIDTH*SCRHEIGHT];
 	clear();
@@ -505,20 +505,15 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene3.txt");
+	m_Scene.load("assets/scene.txt");
 	
 	m_JobManager.initialize(8);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
 
-	const int tileCount = (SCRWIDTH/PrimaryRayBundle::kWidth)*(SCRHEIGHT/PrimaryRayBundle::kHeight);
-	const int perJob = tileCount / m_JobManager.maxConcurrency();
 	for(int i=0; i<m_JobManager.maxConcurrency(); ++i){
 		m_JobPtrs[i].tracer = this;
-		m_JobPtrs[i].start = i * perJob;
-		m_JobPtrs[i].end = (i+1) * perJob;
 		m_Jobs.addRaw(&m_JobPtrs[i]);
 	}
-	m_JobPtrs[m_JobManager.maxConcurrency()-1].end += tileCount % m_JobManager.maxConcurrency();
 
 
 	seed(0);
@@ -532,26 +527,31 @@ Tracer::~Tracer(){
 }
 void Tracer::render()
 {
+	m_CurrentTileId = -1;
 	m_JobManager.spawn(&m_Jobs);
 	m_Jobs.waitUntilDone();
 
 	m_FpCount++;
 }
 void TraceJob::run(){
-	for(int i=start; i<end; ++i){
-		tracer->trace(i);
+	bool res = true;
+	while(res){
+		res = tracer->traceNext();
 	}
 }
 void Tracer::setShadingMode(Tracer::ShadeMode mode){
 	m_Simple = (mode == kShadeSimple);
 }
-void Tracer::trace(int tileIdx){
+bool Tracer::traceNext(){
+	const LONG tileIdx = InterlockedIncrement(&m_CurrentTileId);
+	if(tileIdx >= (SCRWIDTH/PrimaryRayBundle::kWidth)*(SCRHEIGHT/PrimaryRayBundle::kHeight)) return false;
 	const int xcoord = tileIdx % (SCRWIDTH/PrimaryRayBundle::kWidth);
 	const int ycoord = tileIdx / (SCRWIDTH/PrimaryRayBundle::kWidth);
 
 	PrimaryRayBundle rays;
 	m_Camera.GenerateRays(&rays, xcoord, ycoord);
 	tracePrimary(&rays);
+	return true;
 }
 void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 	m_Scene.intersectPrimary(_Rays);
@@ -572,11 +572,8 @@ void Tracer::tracePrimary(PrimaryRayBundle* _Rays){
 float3 Tracer::traceSecondary(Ray* _Ray, int bounce){
 	if(bounce >= 4) return float3(0,0,0);
 
-	//Russian roulette
-	if(randf_oo() > 0.5f) return float3(0,0,0);
-
 	m_Scene.intersectSecondary(_Ray);
-	return trace(_Ray, 2.0f, bounce);
+	return trace(_Ray, 1.0f, bounce);
 }
 float3 DiffuseDirection(const float3& normal){
 	const float3 absNormal(fabsf(normal.x), fabsf(normal.y), fabsf(normal.z));
@@ -597,27 +594,64 @@ float3 DiffuseDirection(const float3& normal){
 						normal * sqrtf(rand1);
 	return Dot(dir, normal) > 0 ? dir : dir * -1.0f;
 }
+float3 sampleTexturePoint(Surface& tex, const float2& uv){
+	const float2 nuv(fmodf(uv.x + 1000.0f, 1.0f), fmodf(uv.y + 1000.0f, 1.0f));
+	const int x = (int)(nuv.x * (float)(tex.GetWidth()-1));
+	const int y =  tex.GetHeight() - 1 - (int)(nuv.y * (float)(tex.GetHeight()-1));
+	const Pixel color =tex.GetBuffer()[y*tex.GetPitch()+x];
+	return float3(
+		(float)((color >> 16)&0xff),
+		(float)((color >> 8)&0xff),
+		(float)((color)&0xff)
+	)/255.0f;
+}
+float3 sampleTextureBilinear(Surface& tex, const float2& uv){
+	const float u = fmodf(uv.x + 1000.0f, 1.0f) * (float)tex.GetWidth() - 0.5f;
+	const float v = fmodf(uv.y + 1000.0f, 1.0f) * (float)tex.GetHeight() - 0.5f;
+
+	const int x = (int)u;
+	const int y = (int)v;
+
+	const float ufrac = u - (float)x;
+	const float vfrac = v - (float)y;
+	const float invufrac = 1 - ufrac;
+	const float invvfrac = 1 - vfrac;
+
+	const float W1 = invufrac*invvfrac;
+	const float W2 = ufrac*invvfrac;
+	const float W3 = invufrac*vfrac;
+	const float W4 = 1-(W1+W2+W3);
+
+	const int invy = tex.GetHeight() - 1 - y;
+	const int x2 = (x+1)%tex.GetWidth();
+	const int y2 = abs((invy-1)%tex.GetHeight());
+	const int	P1 = tex.GetBuffer()[x + invy*tex.GetPitch()],
+				P2 = tex.GetBuffer()[x2 + invy*tex.GetPitch()],	
+				P3 = tex.GetBuffer()[x + y2*tex.GetPitch()],
+				P4 = tex.GetBuffer()[x2 + y2*tex.GetPitch()];
+
+	return float3(
+		W1 * (float)((P1 >> 16)&0xff) + W2 * (float)((P2 >> 16)&0xff) + W3 * (float)((P3 >> 16)&0xff) + W4 * (float)((P4 >> 16)&0xff),
+		W1 * (float)((P1 >> 8 )&0xff) + W2 * (float)((P2 >> 8 )&0xff) + W3 * (float)((P3 >> 8 )&0xff) + W4 * (float)((P4 >> 8 )&0xff),
+		W1 * (float)((P1      )&0xff) + W2 * (float)((P2	  )&0xff) + W3 * (float)((P3      )&0xff) + W4 * (float)((P4      )&0xff)
+	)/255.0f;
+}
 float3 getColorAtIP(Ray& _Ray){
 	if(_Ray.prim->material->texture){
-		Surface& tex = *_Ray.prim->material->texture;
 		const float2 uv = _Ray.prim->uv0 + _Ray.u * (_Ray.prim->uv1-_Ray.prim->uv0) + _Ray.v * (_Ray.prim->uv2-_Ray.prim->uv0);
-		const float2 nuv(fmodf(uv.x+1000.0f, 1.0f), fmodf(uv.y+1000.0f, 1.0f));
-		const int x = (int)(nuv.x * (float)(tex.GetWidth()-1));
-		const int y =  tex.GetHeight() - 1 - (int)(nuv.y * (float)(tex.GetHeight()-1));
-		const Pixel color =tex.GetBuffer()[y*tex.GetPitch()+x];
-		return float3(
-			(float)((color >> 16)&0xff),
-			(float)((color >> 8)&0xff),
-			(float)((color)&0xff)
-		)/255.0f;
+#if FEATURE_BILINEAR_ENABLED
+		return sampleTextureBilinear(*_Ray.prim->material->texture, uv);
+#else
+		return sampleTexturePoint(*_Ray.prim->material->texture, uv);
+#endif
 	}else{
 		return _Ray.prim->material->color;
 	}
 }
 float3 sampleEnvironment(HDRSurface& surf, Ray& _Ray){
 	const float u = fmodf(0.5f * (1.0f + atan2(_Ray.D.x, -_Ray.D.z) / PI), 1.0f);
-	const float v = fmodf(1000.0f + acosf(_Ray.D.y) / PI, 1.0f);
-	const int pixel = (int)(u * (float)surf.width()) + ((int)(v * (float)surf.height()) * surf.width());
+	const float v = acosf(_Ray.D.y) / PI;
+	const int pixel = (int)(u * (float)(surf.width()-1)) + ((int)(v * (float)(surf.height()-1)) * surf.width());
 	return *reinterpret_cast<const float3*>(&surf.buffer()[pixel]);
 }
 float3 Tracer::trace(Ray* _Ray, float power, int bounce){
@@ -631,10 +665,14 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	}
 
 	//Light
-
 	if(mat.light>EPSILON){
 		return color;
 	}
+
+	//Determine to bounce using russial roulette
+	const float chance = 0.2f + 0.3f * MIN((color.x+color.y+color.z)/3, 1.0f);
+	if(randf_oo() > chance) return float3(0,0,0);
+	power = 1.0f / chance;
 
 	//Fresnel
 	float3 normal = _Ray->prim->n0 + _Ray->u * (_Ray->prim->n1-_Ray->prim->n0) + _Ray->v  * (_Ray->prim->n2-_Ray->prim->n0);
