@@ -505,9 +505,9 @@ Tracer::Tracer() :
 }
 
 void Tracer::init(){
-	m_Scene.load("assets/scene.txt");
+	m_Scene.load(SCENE_PATH);
 	
-	m_JobManager.initialize(8);
+	m_JobManager.initialize(NUM_THREADS);
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
 
 	for(int i=0; i<m_JobManager.maxConcurrency(); ++i){
@@ -687,7 +687,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 
 			//Exiting ray (color is beers law)
 			const float c1 = mat.absorption * -_Ray->t;
-			color = float3(expf(c1*(1.0f-color.x)), expf(c1*(1.0f-color.y)), expf(c1*(1.0f-color.z)));
+			color = float3(powf(10.0f, c1*(1.0f-color.x)), powf(10.0f, c1*(1.0f-color.y)), powf(10.0f, c1*(1.0f-color.z)));
 		}else{
 			normal = -normal;
 			ddn = -ddn;

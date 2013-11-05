@@ -12,7 +12,8 @@
 #define FEATURE_AA_ENABLED 1
 #define FEATURE_SKYBOX_ENABLED 1
 #define FEATURE_BILINEAR_ENABLED 1
-
+#define NUM_THREADS 8
+#define SCENE_PATH "assets/scene.txt"
 
 #define DOT128(ax,ay,az,bx,by,bz) _mm_add_ps(_mm_add_ps(_mm_mul_ps(ax, bx), _mm_mul_ps(ay, by)), _mm_mul_ps(az, bz))
 #define SELECTMASK_PS(TRUE_VALUE, FALSE_VALUE, MASK) _mm_or_ps(_mm_and_ps(MASK, TRUE_VALUE), _mm_andnot_ps(MASK, FALSE_VALUE))
