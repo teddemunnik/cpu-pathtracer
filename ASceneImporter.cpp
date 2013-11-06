@@ -1,3 +1,5 @@
+#pragma warning (disable : 4530) // complaint about exception handler
+
 #include <fstream>
 #include <string>
 #include <map>
@@ -8,6 +10,7 @@
 #include <cstdlib>
 #include <sstream>
 #include "SceneImporter.h"
+
 
 
 enum VariableType{
@@ -44,7 +47,7 @@ const unsigned int kStackData = 1024*1024;
 std::array<char, kStackData> dataStack;
 int dataStackPtr;
 void* stackMalloc(int size){
-	assert(dataStackPtr + size < dataStack.max_size());
+	assert(dataStackPtr + size < (int)dataStack.max_size());
 	void* ret =  &dataStack[dataStackPtr];
 	dataStackPtr += size;
 	return ret;
@@ -284,7 +287,7 @@ Variable* findVariable(const std::string& str, int* out_offs){
 		int num = 0;
 		auto offs = vec3Begin+1;
 		while(true){
-			val[num] = strtod(&str.c_str()[offs], nullptr);
+			val[num] = (float)strtod(&str.c_str()[offs], nullptr);
 			offs = str.find(',', offs);
 			if(offs == std::string::npos) break;
 			offs ++;

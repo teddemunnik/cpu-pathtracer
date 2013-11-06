@@ -1,5 +1,6 @@
 // Template for GP1, version 1
 // IGAD/NHTV - Jacco Bikker - 2006-2013
+#pragma warning (disable : 4530) // complaint about exception handler
 
 #include "string.h"
 #include "game.h"
@@ -112,11 +113,6 @@ void Game::Tick( float a_DT )
 		tracer.setShadingMode(g_ShadeMode);
 		wasTab = false;
 		tracer.clear();
-	}
-
-	//save to file
-	if(g_KeyState[SDLK_SPACE]){
-		m_Surface->SaveImage("output.jpg");
 	}
 	
 	tracer.camera().set(g_CameraPosition, g_CameraRotation);

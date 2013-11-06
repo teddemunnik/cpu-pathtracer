@@ -3,8 +3,8 @@
 
 #pragma once
 
-#define SCRWIDTH	400
-#define SCRHEIGHT	400
+#define SCRWIDTH	1280
+#define SCRHEIGHT	720
 
 #include "math.h"
 #include "stdlib.h"

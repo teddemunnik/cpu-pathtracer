@@ -1,13 +1,14 @@
 #version 330 core
 
 uniform sampler2D _MainTex;
+uniform vec2 _ScreenSize;
 
 in vec2 fragUv;
 
 out vec3 color;
 
-const float blurSize =2.0f/1080.0f;
 void main(){
+	float blurSize = 1.0f/_ScreenSize.y;
 	vec3 sum = vec3(0.0f, 0.0f, 0.0f);
 	sum += texture2D(_MainTex, vec2(fragUv.x, fragUv.y - 4.0f * blurSize)).rgb * 0.0162162162;
 	sum += texture2D(_MainTex, vec2(fragUv.x, fragUv.y - 3.0f * blurSize)).rgb * 0.0540540541;

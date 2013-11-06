@@ -48,7 +48,11 @@ BloomFX::BloomFX(){
 	m_LDRMapShader.loadFile("assets/shaders/default.vert.glsl", "assets/shaders/bloom_mapldr.frag.glsl");
 	m_ExtractBrightShader.loadFile("assets/shaders/default.vert.glsl", "assets/shaders/bloom_extract.frag.glsl");
 	m_HorizontalGaussian.loadFile("assets/shaders/default.vert.glsl", "assets/shaders/bloom_hblur.frag.glsl");
+	Shader::bind(&m_HorizontalGaussian);
+	Shader::setVec2(m_HorizontalGaussian.uniformLocation("_ScreenSize"), float2((float)SCRWIDTH, (float)SCRHEIGHT));
 	m_VerticalGaussian.loadFile("assets/shaders/default.vert.glsl", "assets/shaders/bloom_vblur.frag.glsl");
+	Shader::bind(&m_VerticalGaussian);
+	Shader::setVec2(m_HorizontalGaussian.uniformLocation("_ScreenSize"), float2((float)SCRWIDTH, (float)SCRHEIGHT));
 }
 BloomFX::~BloomFX(){
 	glDeleteFramebuffers(1, &m_BloomFramebuffer);

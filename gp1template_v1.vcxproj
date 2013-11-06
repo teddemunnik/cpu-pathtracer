@@ -112,8 +112,7 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
@@ -145,6 +144,7 @@
     <ClInclude Include="MBVH.h" />
     <ClInclude Include="mtrand.h" />
     <ClInclude Include="OBJLoader.h" />
+    <ClInclude Include="path.h" />
     <ClInclude Include="PostFX.h" />
     <ClInclude Include="raytracer.h" />
     <ClInclude Include="Renderer.h" />

@@ -153,9 +153,9 @@ int main( int argc, char **argv )
 		// calculate frame time and pass it to game->Tick
 		LARGE_INTEGER start, end;
 		QueryPerformanceCounter( &start );
-		swap();
-		game->Tick( (float)lastftime );
 
+		game->Tick( (float)lastftime );
+		swap();
 
 
 
@@ -163,7 +163,7 @@ int main( int argc, char **argv )
 		SDL_Event event;
 		while (SDL_PollEvent( &event )) 
 		{
-			bool handled = TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+			bool handled = TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION) == 0 ? false : true;
 			if(!handled){
 			switch (event.type)
 			{

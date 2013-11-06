@@ -1,5 +1,6 @@
 // Template for GP1, version 1
 // IGAD/NHTV - Jacco Bikker - 2006-2013
+#pragma warning (disable : 4530)
 
 #include "template.h"
 #include "raytracer.h"
@@ -12,6 +13,8 @@
 #include <gl/glew.h>
 #include "SceneImporter.h"
 #include "HDRSurface.h"
+
+
 
 using namespace Tmpl8;
 
@@ -381,7 +384,7 @@ void Scene::load(const char* path){
 	std::vector<Model*> models;
 	ImportScene(path, &models);
 
-	for(int i=0; i<models.size(); ++i){
+	for(size_t i=0; i<models.size(); ++i){
 		LoadOBJ(models[i]);
 	}
 
@@ -392,8 +395,11 @@ void Scene::load(const char* path){
 	mbvhRoot.fromBvh(root);
 
 	//Sky texture
-	skytexture = new HDRSurface("assets/sky.hdr");
-	
+#ifdef ENVIRONMENT_MAP_PATH
+	skytexture = new HDRSurface(ENVIRONMENT_MAP_PATH);
+#else
+	skytexture = nullptr;
+#endif
 }
 void Scene::LoadOBJ(Model* model){
 
@@ -411,7 +417,7 @@ void Scene::LoadOBJ(Model* model){
 	if(::LoadOBJ(model->name.c_str(), &vertices, &normals, &uvs, &submeshes, &materials)){
 		//Convert to triangles
 		int start = primCount;
-		for(int i=0; i<vertices.size(); i+=3){
+		for(size_t i=0; i<vertices.size(); i+=3){
 			primList[primCount] = Triangle(vertices[i+0], vertices[i+1], vertices[i+2]);
 			primList[primCount].n0 = normals[i];
 			primList[primCount].n1 = normals[i+1];
@@ -424,7 +430,7 @@ void Scene::LoadOBJ(Model* model){
 		}
 
 		//Convert OBJ materials to raytracer materials
-		for(int i=0; i<materials.size(); ++i){
+		for(size_t i=0; i<materials.size(); ++i){
 			Material* mat = new Material();
 			mat->color = materials[i].diffuse;
 			mat->refl = materials[i].refl;
@@ -445,7 +451,7 @@ void Scene::LoadOBJ(Model* model){
 		for(auto it = model->groups.begin(); it!=model->groups.end(); ++it){
 			Group* g = nullptr;
 			int index = -1;
-			for(int i=0; i<finalMaterials.size(); ++i){
+			for(size_t i=0; i<finalMaterials.size(); ++i){
 				if(materials[i].name == it->first){
 					g = it->second;
 					index = i;
@@ -464,10 +470,10 @@ void Scene::LoadOBJ(Model* model){
 
 
 		//Set materials
-		for(int i=0; i<submeshes.size(); ++i){
+		for(size_t i=0; i<submeshes.size(); ++i){
 			//find the material
 			int index = -1;
-			for(int j=0; j<materials.size(); ++j){
+			for(size_t j=0; j<materials.size(); ++j){
 				if(materials[j].name == submeshes[i].material){
 					index = j;
 					break;
@@ -507,7 +513,11 @@ Tracer::Tracer() :
 void Tracer::init(){
 	m_Scene.load(SCENE_PATH);
 	
+#ifdef NUM_THREADS
 	m_JobManager.initialize(NUM_THREADS);
+#else
+	m_JobManager.initialize();
+#endif
 	m_JobPtrs = new TraceJob[m_JobManager.maxConcurrency()];
 
 	for(int i=0; i<m_JobManager.maxConcurrency(); ++i){
@@ -655,11 +665,17 @@ float3 sampleEnvironment(HDRSurface& surf, Ray& _Ray){
 	return *reinterpret_cast<const float3*>(&surf.buffer()[pixel]);
 }
 float3 Tracer::trace(Ray* _Ray, float power, int bounce){
-	if(!_Ray->prim) return scene().skytexture ? sampleEnvironment(*scene().skytexture, *_Ray) : float3(0,0,0);
+	if(!_Ray->prim){
+#if FEATURE_SKYBOX_ENABLED
+		return scene().skytexture ? sampleEnvironment(*scene().skytexture, *_Ray) : float3(0,0,0);
+#else
+		return float3(0,0,0);
+#endif
+	}
 	if(!_Ray->prim->material) return float3(0,0,0);
 
 	const Material& mat = *_Ray->prim->material;
-	float3 color = getColorAtIP(*_Ray);
+	const float3 color = getColorAtIP(*_Ray);
 	if(m_Simple){
 		return color;
 	}
@@ -669,7 +685,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		return color;
 	}
 
-	//Determine to bounce using russial roulette
+	//Determine to bounce using russian roulette
 	const float chance = 0.2f + 0.3f * MIN((color.x+color.y+color.z)/3, 1.0f);
 	if(randf_oo() > chance) return float3(0,0,0);
 	power = 1.0f / chance;
@@ -679,23 +695,21 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 	float nt, nnt, ddn, cosT2;
 	float refl = mat.refl;
 	float refr = mat.refr;
+	float3 absorption(1,1,1);
 	if(mat.refr > EPSILON){
 		ddn = Dot(normal, _Ray->D);
 		if(ddn > 0){
 			nnt = mat.refrIndex;
 			nt = 1.0f/nnt;		
 
-			//Exiting ray (color is beers law)
-			const float c1 = mat.absorption * -_Ray->t;
-			color = float3(powf(10.0f, c1*(1.0f-color.x)), powf(10.0f, c1*(1.0f-color.y)), powf(10.0f, c1*(1.0f-color.z)));
+			//Exiting ray (apply beers law)
+			const float c1 = -_Ray->t * mat.absorption;
+			absorption = float3(powf(10.0f, c1*(1.0f-color.x)), powf(10.0f, c1*(1.0f-color.y)), powf(10.0f, c1 * (1.0f-color.z)));
 		}else{
 			normal = -normal;
 			ddn = -ddn;
 			nt = mat.refrIndex;
 			nnt = 1.0f/nt;
-
-			//Ingoing ray (no energy loss, will be handled when the ray goes out)
-			color = float3(1,1,1);
 		}
 
 		cosT2 = 1.0f - nnt*nnt * (1.0f - ddn*ddn);
@@ -722,7 +736,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		r.O += r.D*EPSILON;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * power * traceSecondary(&r, bounce+1);
+		return color * absorption * power * traceSecondary(&r, bounce+1);
 	}
 
 	//Refraction
@@ -733,7 +747,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		r.D = D;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * power *  traceSecondary(&r, bounce+1);
+		return absorption * power *  traceSecondary(&r, bounce+1);
 	}
 
 	{
@@ -746,7 +760,7 @@ float3 Tracer::trace(Ray* _Ray, float power, int bounce){
 		r.O += r.D*EPSILON;
 		r.t = 1e34f;
 		r.prim = nullptr;
-		return color * power * traceSecondary(&r, bounce+1);
+		return color * absorption * power * traceSecondary(&r, bounce+1);
 	}
 }
 Camera& Tracer::camera(){

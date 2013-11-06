@@ -57,6 +57,8 @@ bool LoadMtlLib(const char* filePath, std::vector<OBJMaterial>* out){
 			}
 		}
 	}
+
+	return true;
 }
 bool LoadOBJ(const char* filePath, std::vector<float3>* out_verts, std::vector<float3>* out_normals, std::vector<float2>* out_uv, std::vector<OBJSubMesh>* out_submeshes, std::vector<OBJMaterial>* out_materials){
 	FILE* file = fopen(filePath, "r");
@@ -154,7 +156,7 @@ bool LoadOBJ(const char* filePath, std::vector<float3>* out_verts, std::vector<f
 		}
 	}
 
-	for(int i=0; i<tmp_iVerts.size(); ++i){
+	for(size_t i=0; i<tmp_iVerts.size(); ++i){
 		out_verts->push_back(tmp_Verts[tmp_iVerts[i]]);
 		out_normals->push_back(tmp_Normals[tmp_iNormals[i]]);
 		out_uv->push_back(tmp_Uv[tmp_iUv[i]]);

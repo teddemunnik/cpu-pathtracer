@@ -1,3 +1,5 @@
+#pragma warning (disable : 4530) //C++ exception handler, but no unwind semantics
+
 #include "Renderer.h"
 #include "template.h"
 #include "PostFX.h"

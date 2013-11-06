@@ -1,3 +1,5 @@
+#pragma warning (disable : 4530) //C++ exception handler used, but no unwind semantics
+
 #include "Shader.h"
 
 #include <fstream>
@@ -28,7 +30,7 @@ bool readEntireFile(const char* path, std::string* out_string){
 	std::ifstream ifs(path);
 	if(!ifs.good()) return false;
 	ifs.seekg(0, std::ios::end);
-	out_string->reserve(ifs.tellg());
+	out_string->reserve((unsigned int)ifs.tellg());
 	ifs.seekg(0, std::ios::beg);
 	out_string->assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 	ifs.close();
@@ -88,4 +90,7 @@ void Shader::setInt(GLint location, GLint value){
 }
 void Shader::setFloat(GLint location, GLfloat value){
 	glUniform1f(location, value);
+}
+void Shader::setVec2(GLint location, const float2& value){
+	glUniform2fv(location, 1, reinterpret_cast<const GLfloat*>(&value));
 }

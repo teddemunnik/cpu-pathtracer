@@ -1,6 +1,8 @@
 #pragma once
 #include <gl/glew.h>
+#include "template.h"
 
+using namespace Tmpl8;
 
 class Shader{
 public:
@@ -22,4 +24,5 @@ public:
 	static void bind(const Shader* shader);
 	static void setInt(GLint location, GLint value);
 	static void setFloat(GLint location, GLfloat value);
+	static void setVec2(GLint location, const float2& value);
 }; 

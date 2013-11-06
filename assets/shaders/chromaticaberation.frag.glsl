@@ -1,6 +1,7 @@
 #version 330 core
 
 uniform sampler2D _MainTex;
+uniform vec2 _ScreenSize;
 
 in vec2 fragUv;
 
@@ -8,8 +9,8 @@ out vec3 color;
 
 const float offset=5.0f;
 
-const vec2 move = vec2(3.0f/1920.0f, 3.0f/1080.0f);
 void main(){
+	vec2 move = 1.0f / _ScreenSize;
 	vec2 dist = fragUv - vec2(0.5f, 0.5f);
 	vec2 sqrDist = dist * dist;
 

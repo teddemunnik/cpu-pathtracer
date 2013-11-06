@@ -1,13 +1,12 @@
 Model scene = "assets/scene2.obj";
 
-scene["lambert2SG"] = {
-	light: 1.0f,
-	intensity: 5.0f
-};
-
-Model glass = "assets/sphere.obj";
-glass["sphere:initialShadingGroup"] = {
+scene["dragon:initialShadingGroup"] = {
 	refr: 1.0f,
 	refrIndex: 1.5f,
-	absorption: 1.0f
+	absorption: 3.0f
+};
+scene["lambert2SG"] = {
+	refr: 0.8f,
+	refrIndex: 1.6f,
+	absorption: 0.5f
 };
