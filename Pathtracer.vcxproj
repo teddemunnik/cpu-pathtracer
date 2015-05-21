@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Template</ProjectName>
+    <ProjectName>Pathtracer</ProjectName>
     <ProjectGuid>{D8FE2186-4BF0-4B89-913F-6C26818E5AC5}</ProjectGuid>
     <RootNamespace>tmpl8300e</RootNamespace>
     <Keyword>Win32Proj</Keyword>
