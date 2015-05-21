@@ -1,0 +1,8 @@
+JobSystem/Release/
+Release/
+*.filters
+*.user
+*.suo
+*.sdf
+*.pdb
+Debug/
